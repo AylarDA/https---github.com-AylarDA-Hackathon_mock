@@ -15,8 +15,10 @@ authentication_router = APIRouter()
 def signUp(req: registerSchema, db: Session = Depends(get_db)):
     try:
         result = crud.signUp(req, db)
-        if result:
-            return JSONResponse(status_code=status.HTTP_201_CREATED, content={'result': 'Succesfully signed up'})
+        if result == -1:
+            return JSONResponse(status_code=status.HTTP_416_REQUESTED_RANGE_NOT_SATISFIABLE, content={'result': 'Failed to sign up'})
+        elif result:
+            return JSONResponse(status_code=status.HTTP_201_CREATED, content={'result': 'Succesfully signed up'})    
         else:
             return JSONResponse(status_code=status.HTTP_406_NOT_ACCEPTABLE, content={'result': 'Failed to sign up'})
     except Exception as e:

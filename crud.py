@@ -2,6 +2,7 @@ from sqlalchemy.orm import Session, joinedload
 from models import Category, Product, Images, About, Users
 from upload_depends import upload_image
 from sqlalchemy import or_, and_, func
+from translation import translation2TM, translation2RU
 
 
 def create_category(req, db:Session):
@@ -17,13 +18,16 @@ def read_category(db:Session):
     return result
 
 
-def read_current_category(id, db:Session):
-    result = db.query(
-        Category.id,
-        Category.name,
-        Product.name.label('product_name')
-    ).join(Category, Category.id == Product.category_id).filter(Category.id == id).all()
-    return result
+##joined_load_options-> for parent
+##join-> for child
+##TRY JOINED LOAD OPTIONS
+# def read_current_category(id, db:Session):
+#     result = db.query(
+#         Category.id,
+#         Category.name,
+#         Product.name.label('product_name')
+#     ).join(Category, Category.id == Product.category_id).filter(Category.id == id).all()
+#     return result
 
 
 def create_product(req, db:Session):
@@ -40,6 +44,15 @@ def read_product(db:Session):
         Product.name,
         Category.name.label('category_name')
     ).join(Category, Category.id == Product.category_id).all()
+    return result
+
+
+def read_current_product(id, db:Session):
+    result = db.query(
+        Product.id,
+        Product.name,
+        Category.name.label('category_name')
+    ).join(Product, Product.category_id == Category.id).filter(Product.id == id).all()
     return result
 
 
@@ -69,6 +82,10 @@ def read_about(db:Session):
 
 
 def signUp(req, db: Session):
+    if req.password and req.username and req.email == '' or \
+        len(req.password) < 8 or len(req.username) < 8 or len(req.email) < 8 or \
+        ' ' in req.password or ' ' in req.username or ' ' in req.email:
+        return -1 
     user = db.query(Users).filter(
         or_(
             Users.email == req.email,
@@ -102,11 +119,13 @@ def read_users(db: Session):
     return db.query(Users.id, Users.email, Users.username).all()
 
 
-# def search(q, db:Session):
-#     result = db.query(Product)\
-#         .filter(
-#             or_(
-#                 func.lower(Product.name).like(f'%{q}%'),
-#             )  
-#         ).all()
-#     return result
+def search(q, db:Session):
+    result = db.query(Product)\
+        .filter(
+            or_(
+                func.lower(Product.name).like(f'%{q.translate(translation2TM)}%'),
+                func.lower(Product.name).like(f'%{q}%'),
+            )  
+        ).all()
+    print(q.translate(translation2TM))
+    return result

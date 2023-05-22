@@ -30,3 +30,26 @@ def get_product(db: Session = Depends(get_db)):
     except Exception as e:
         print(e)
         return HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Something went wrong!!!')
+    
+    
+@product_router.get('/get-current-product-with-path/{id}')
+def get_product(id: int, db: Session = Depends(get_db)):
+    try:
+        result = crud.read_current_product(id, db)
+        result = jsonable_encoder(result)
+        return JSONResponse(status_code=status.HTTP_200_OK, content=result)
+    except Exception as e:
+        print(e)
+        return HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Something went wrong!!!')
+
+    
+    
+@product_router.get('/search')
+def search(q: str, db: Session = Depends(get_db)):
+    try:
+        result = crud.search(q, db)
+        result = jsonable_encoder(result)
+        return JSONResponse(status_code=status.HTTP_200_OK, content=result)
+    except Exception as e:
+        print(e)
+        return HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Something went wrong!!!')
