@@ -26,3 +26,15 @@ def upload_image(directory, file):
         return upload_file_path_for_db
     else:
         return False
+    
+    
+def delete_uploaded_image(image_name):
+    path_for_remove = sys.path[0] + image_name
+    if os.path.exists(path_for_remove):
+        os.remove(path_for_remove)
+    else:
+        return False
+    if path_for_remove:
+        return True
+    else:
+        return False

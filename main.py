@@ -1,16 +1,14 @@
 from fastapi import FastAPI
 from db import Base, engine
-from routers import category_router, product_router, image_router, about_router, authentication_router
+from routers import image_router, authentication_router, application_router
 from fastapi.staticfiles import StaticFiles
 
-app = FastAPI()
+app = FastAPI(title='reuse')
 
 app.mount('/uploads', StaticFiles(directory='uploads'), name='uploads')
 
 Base.metadata.create_all(engine)
 
-app.include_router(category_router, tags=['Category'])
-app.include_router(product_router, tags=['Product'])
 app.include_router(image_router, tags=['Image'])
-app.include_router(about_router, tags=['About'])
 app.include_router(authentication_router, tags=['Authentication'])
+app.include_router(application_router, tags=['Application'])

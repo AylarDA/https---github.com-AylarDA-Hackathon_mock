@@ -7,7 +7,7 @@ USERNAME = 'postgres'
 PASSWORD = 'pinkpantera9093'
 HOST = '127.0.0.1'
 PORT = '5432'
-DB = 'demo'
+DB = 'reuse'
 
 SQLALCHEMY_DATABASE_URL = f"{ DB_TYPE }://{ USERNAME }:{ PASSWORD }@{ HOST }:{PORT}/{ DB }"
 

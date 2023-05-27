@@ -1,66 +1,13 @@
 from sqlalchemy.orm import Session, joinedload
-from models import Category, Product, Images, About, Users
-from upload_depends import upload_image
+from models import Images, Users, Application
+from upload_depends import upload_image, delete_uploaded_image
 from sqlalchemy import or_, and_, func
-from translation import translation2TM, translation2RU
-
-
-def create_category(req, db:Session):
-    new_add = Category(**req.dict())
-    db.add(new_add)
-    db.commit()
-    db.refresh(new_add)
-    return new_add
-
-
-def read_category(db:Session):
-    result = db.query(Category).options(joinedload(Category.product)).all()
-    return result
-
-
-##joined_load_options-> for parent
-##join-> for child
-##TRY JOINED LOAD OPTIONS
-# def read_current_category(id, db:Session):
-#     result = db.query(
-#         Category.id,
-#         Category.name,
-#         Product.name.label('product_name')
-#     ).join(Category, Category.id == Product.category_id).filter(Category.id == id).all()
-#     return result
-
-
-def create_product(req, db:Session):
-    new_add = Product(**req.dict())
-    db.add(new_add)
-    db.commit()
-    db.refresh(new_add)
-    return new_add
-    
-
-def read_product(db:Session):
-    result = db.query(
-        Product.id,
-        Product.name,
-        Category.name.label('category_name')
-    ).join(Category, Category.id == Product.category_id).all()
-    return result
-
-
-def read_current_product(id, db:Session):
-    result = db.query(
-        Product.id,
-        Product.name,
-        Category.name.label('category_name')
-    ).join(Product, Product.category_id == Category.id).filter(Product.id == id).all()
-    return result
 
 
 def create_image(id, file, db: Session):
     uploaded_img_name = upload_image('profile', file)
     new_add = Images(
-        img = uploaded_img_name,
-        product_id = id
+        img = uploaded_img_name
     )
     db.add(new_add)
     db.commit()
@@ -68,28 +15,29 @@ def create_image(id, file, db: Session):
     return new_add
 
 
-def create_about(req, db:Session):
-    new_add = About(**req.dict())
-    db.add(new_add)
-    db.commit()
-    db.refresh(new_add)
-    return new_add
-
-
-def read_about(db:Session):
-    result = db.query(About).all()
+def read_image(db:Session):
+    result = db.query(Images).all()
     return result
 
 
+def delete_image(id, db: Session):
+    image = db.query(Images).filter(Images.id == id).first()
+    if image.img:
+        delete_uploaded_image(image_name=image.img)
+        db.query(Images).filter(Images.id == id) \
+            .delete(synchronize_session=False)
+        db.commit()
+    return True
+
+
 def signUp(req, db: Session):
-    if req.password and req.username and req.email == '' or \
-        len(req.password) < 8 or len(req.username) < 8 or len(req.email) < 8 or \
-        ' ' in req.password or ' ' in req.username or ' ' in req.email:
+    if req.name and req.city and req.adress and req.number and req.password == '' or \
+        len(req.password) < 8 or \
+        ' ' in req.name and ' ' in req.adress and ' ' in req.number and ' ' in req.password:
         return -1 
     user = db.query(Users).filter(
         or_(
-            Users.email == req.email,
-            Users.username == req.username
+            Users.password == req.password,
         )
     ).first()
     if user:
@@ -105,8 +53,8 @@ def signIn(req, db: Session):
     user = db.query(Users).filter(
         and_(
             or_(
-                Users.email == req.email,
-                Users.username == req.email
+                Users.number == req.number,
+                Users.password == req.password
             ),
             Users.password == req.password
         )
@@ -116,16 +64,24 @@ def signIn(req, db: Session):
     
     
 def read_users(db: Session):
-    return db.query(Users.id, Users.email, Users.username).all()
+    return db.query(Users).all()
 
 
-def search(q, db:Session):
-    result = db.query(Product)\
-        .filter(
-            or_(
-                func.lower(Product.name).like(f'%{q.translate(translation2TM)}%'),
-                func.lower(Product.name).like(f'%{q}%'),
-            )  
-        ).all()
-    print(q.translate(translation2TM))
+def create_application(req, db:Session):
+    new_add = Application(**req.dict())
+    db.add(new_add)
+    db.commit()
+    db.refresh(new_add)
+    return new_add
+
+
+def read_application(status, db:Session):
+    result = db.query(Application)
+    if status:
+        result = result.filter(Application.status == status)
+    return result.all()
+
+
+def read_current_application(id, db:Session):
+    result = db.query(Application).filter(Application.id == id).first()
     return result

@@ -1,25 +1,20 @@
 from pydantic import BaseModel
-
-class categorySchema(BaseModel):
-    name: str
-    
-    
-class productSchema(BaseModel):
-    name: str
-    category_id: int
-
-
-class aboutSchema(BaseModel):
-    description: str
     
     
 class loginSchema(BaseModel):
-    email: str
+    number: str
     password: str
     
     
 class registerSchema(BaseModel):
-    username: str
-    email: str
+    name: str
+    city: str
+    adress: str
+    number: str
     password: str
+    
+    
+class applicationSchema(BaseModel):
+    name : str
+    text : str
 

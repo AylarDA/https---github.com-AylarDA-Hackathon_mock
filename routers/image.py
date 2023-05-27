@@ -18,3 +18,25 @@ def upload_img(id: int, db: Session = Depends(get_db), file: UploadFile = File(.
     except Exception as e:
         print(e)
         return HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Something went wrong!!!')
+
+
+@image_router.get('/get-image')
+def get_image(db: Session = Depends(get_db)):
+    try:
+        result = crud.read_image(db)
+        result = jsonable_encoder(result)
+        return JSONResponse(status_code=status.HTTP_200_OK, content=result)
+    except Exception as e:
+        print(e)
+        return HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Something went wrong!!!')
+
+
+@image_router.delete('/delete-img')
+def delete_img(id: int, db: Session = Depends(get_db)):
+    try:
+        result = crud.delete_image(id, db)
+        result = jsonable_encoder(result)
+        return JSONResponse(status_code=status.HTTP_200_OK, content={"result":'DELETED'})
+    except Exception as e:
+        print(e)
+        return HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={'result': 'NOT'})
